@@ -11,22 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout
+        uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
-      - name: Setup Java
+      - name: setup Java
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: 17
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-      - name: Build with Gradle
+      - name: build
         run: ./gradlew assembleNonRootRelease
 
-      - name: Sign app APK
+      - name: sign
         uses: r0adkll/sign-android-release@v1
         # ID used to access action output
         id: sign_app
@@ -39,8 +38,9 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
 
-      - name: Upload APK
+      - name: upload
         uses: actions/upload-artifact@v4
         with:
-          name: Moonlight APK
+          name: moonlight
           path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          if-no-files-found: error

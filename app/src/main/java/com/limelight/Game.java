@@ -767,6 +767,10 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         // With Android native pointer capture, capture is lost when focus is lost,
         // so it must be requested again when focus is regained.
         inputCaptureProvider.onWindowFocusChanged(hasFocus);
+
+        if (connected) {
+            KeyboardAccessibilityService.setFilterState(hasFocus);
+        }
     }
 
     private boolean isRefreshRateEqualMatch(float refreshRate) {
@@ -1076,6 +1080,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         // Destroy the capture provider
         inputCaptureProvider.destroy();
+
+        KeyboardAccessibilityService.setFilterState(false);
     }
 
     @Override
@@ -2315,6 +2321,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             connecting = connected = false;
             updatePipAutoEnter();
 
+            KeyboardAccessibilityService.setFilterState(false);
+
             controllerHandler.stop();
 
             // Update GameManager state to indicate we're no longer in game
@@ -2499,6 +2507,10 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 connected = true;
                 connecting = false;
                 updatePipAutoEnter();
+
+                if (hasWindowFocus()) {
+                    KeyboardAccessibilityService.setFilterState(true);
+                }
 
                 // Hide the mouse cursor now after a short delay.
                 // Doing it before dismissing the spinner seems to be undone

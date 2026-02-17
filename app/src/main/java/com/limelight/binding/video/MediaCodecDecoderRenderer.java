@@ -78,6 +78,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private String glRenderer;
     private boolean foreground = true;
     private PerfOverlayListener perfListener;
+    private volatile boolean perfOverlayEnabled;
 
     private static final int CR_MAX_TRIES = 10;
     private static final int CR_RECOVERY_TYPE_NONE = 0;
@@ -307,6 +308,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         this.consecutiveCrashCount = consecutiveCrashCount;
         this.glRenderer = glRenderer;
         this.perfListener = perfListener;
+        this.perfOverlayEnabled = prefs.enablePerfOverlay;
 
         this.activeWindowVideoStats = new VideoStats();
         this.lastWindowVideoStats = new VideoStats();
@@ -457,6 +459,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     public void notifyVideoBackground() {
         foreground = false;
+    }
+
+    public void setPerfOverlayEnabled(boolean enabled) {
+        perfOverlayEnabled = enabled;
     }
 
     public int getActiveVideoFormat() {
@@ -1423,7 +1429,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         // Flip stats windows roughly every second
         if (SystemClock.uptimeMillis() >= activeWindowVideoStats.measurementStartTimestamp + 1000) {
-            if (prefs.enablePerfOverlay) {
+            if (perfOverlayEnabled) {
                 VideoStats lastTwo = new VideoStats();
                 lastTwo.add(lastWindowVideoStats);
                 lastTwo.add(activeWindowVideoStats);

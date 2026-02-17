@@ -42,6 +42,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.PictureInPictureParams;
 import android.app.Service;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1273,6 +1275,27 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                         }
                         break;
 
+                    // Toggle performance stats overlay
+                    case KeyEvent.KEYCODE_S:
+                        boolean showPerfOverlay = performanceOverlayView.getVisibility() != View.VISIBLE;
+                        performanceOverlayView.setVisibility(showPerfOverlay ? View.VISIBLE : View.GONE);
+                        decoderRenderer.setPerfOverlayEnabled(showPerfOverlay);
+                        break;
+
+                    // Type clipboard text on the host
+                    case KeyEvent.KEYCODE_V:
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                        if (clipboard != null && clipboard.hasPrimaryClip()) {
+                            ClipData clip = clipboard.getPrimaryClip();
+                            if (clip != null && clip.getItemCount() > 0) {
+                                CharSequence text = clip.getItemAt(0).coerceToText(Game.this);
+                                if (text != null && text.length() > 0) {
+                                    conn.sendUtf8Text(text.toString());
+                                }
+                            }
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -1290,6 +1313,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 case KeyEvent.KEYCODE_Z:
                 case KeyEvent.KEYCODE_Q:
                 case KeyEvent.KEYCODE_C:
+                case KeyEvent.KEYCODE_S:
+                case KeyEvent.KEYCODE_V:
                     // Remember that a special key combo was activated, so we can consume all key
                     // events until the modifiers come up
                     specialKeyCode = androidKeyCode;
